@@ -259,8 +259,9 @@ been forked, this allows multiple processes to share the same L<Mojo::SQLite>
 object safely.
 
 Any database errors will throw an exception as C<RaiseError> is automatically
-enabled, so use C<eval> or L<Try::Tiny> to catch them. This makes transactions
-with L<Mojo::SQLite::Database/"begin"> easy.
+enabled, so use L<the 'try' feature|feature/"The 'try' feature"> or
+L<Feature::Compat::Try> to catch them. This makes transactions with
+L<Mojo::SQLite::Database/"begin"> easy.
 
 While passing a file path of C<:memory:> (or a custom L</"dsn"> with
 C<mode=memory>) will create a temporary database, in-memory databases cannot be
@@ -268,15 +269,15 @@ shared between connections, so subsequent calls to L</"db"> may return
 connections to completely different databases. For a temporary database that
 can be shared between connections and processes, pass a file path of C<:temp:>
 to store the database in a temporary directory (this is the default), or
-consider constructing a temporary directory yourself with L<File::Temp> if you
-need to reuse the filename. A temporary directory allows SQLite to create
+consider constructing a temporary directory yourself with L<File::Temp> (used
+via L<Mojo::File> below) if you need to reuse the filename. A temporary
+directory allows SQLite to create
 L<additional temporary files|https://www.sqlite.org/tempfiles.html> safely.
 
-  use File::Spec::Functions 'catfile';
-  use File::Temp;
+  use Mojo::File 'tempdir';
   use Mojo::SQLite;
-  my $tempdir = File::Temp->newdir; # Deleted when object goes out of scope
-  my $tempfile = catfile $tempdir, 'test.db';
+  my $tempdir = tempdir; # Deleted when object goes out of scope
+  my $tempfile = tempdir->child('test.db');
   my $sql = Mojo::SQLite->new->from_filename($tempfile);
 
 =head1 EXAMPLES
